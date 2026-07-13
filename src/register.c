@@ -73,8 +73,12 @@ if (attempts == 0)
         return FAILURE;
     }
 
-    create_master_file(username,password);
-    create_vault_file(username);
+    char hash[65];
+
+sha256_string(password, hash);
+
+create_master_file(username, hash);
+create_vault_file(username);
 
     printf("\nRegistration Successful.\n");
 

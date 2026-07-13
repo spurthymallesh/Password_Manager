@@ -6,7 +6,8 @@ SRC = src/main.c \
       src/register.c \
       src/login.c \
       src/file.c \
-      src/utils.c
+      src/utils.c \
+      src/sha256.c
 
 TARGET = password_manager
 

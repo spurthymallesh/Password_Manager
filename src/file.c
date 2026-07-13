@@ -23,7 +23,7 @@ int create_user_directory(const char *username)
     return FAILURE;
 }
 
-int create_master_file(const char *username, const char *password)
+int create_master_file(const char *username, const char *password_hash)
 {
     char filename[150];
 
@@ -35,7 +35,7 @@ int create_master_file(const char *username, const char *password)
         return FAILURE;
 
     fprintf(fp,"%s\n",username);
-    fprintf(fp,"%s\n",password);      // SHA-256 later
+    fprintf(fp,"%s\n",password_hash);      // SHA-256 later
 
     fclose(fp);
 

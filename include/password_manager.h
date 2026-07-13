@@ -53,5 +53,5 @@ int create_vault_file(const char *username);
 
 /* SHA-256 Wrapper */
 void sha256_string(const char *input, char output[HASH_SIZE]);
-
+void sha256_string(const char *input, char output[65]);
 #endif
