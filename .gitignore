@@ -1,0 +1,6 @@
+*.o
+*.exe
+*.out
+build/
+users/*.vault
+users/*.master
