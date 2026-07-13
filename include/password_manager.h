@@ -50,6 +50,7 @@ int user_exists(const char *username);
 int create_user_directory(const char *username);
 int create_master_file(const char *username, const char *password);
 int create_vault_file(const char *username);
+int read_master_file(const char *username, User *user);
 
 /* SHA-256 Wrapper */
 void sha256_string(const char *input, char output[HASH_SIZE]);

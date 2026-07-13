@@ -34,8 +34,8 @@ int create_master_file(const char *username, const char *password_hash)
     if (fp == NULL)
         return FAILURE;
 
-    fprintf(fp,"%s\n",username);
-    fprintf(fp,"%s\n",password_hash);      // SHA-256 later
+    fprintf(fp,"Username: %s\n",username);
+    fprintf(fp,"PasswordHash: %s\n",password_hash);      // SHA-256 later
 
     fclose(fp);
 
@@ -52,6 +52,25 @@ int create_vault_file(const char *username)
 
     if(fp == NULL)
         return FAILURE;
+
+    fclose(fp);
+
+    return SUCCESS;
+}
+
+int read_master_file(const char *username, User *user)
+{
+    char filename[150];
+
+    sprintf(filename, "users/%s/master.dat", username);
+
+    FILE *fp = fopen(filename, "r");
+
+    if (fp == NULL)
+        return FAILURE;
+
+    fscanf(fp, "Username: %29s\n", user->username);
+    fscanf(fp, "PasswordHash: %64s", user->password_hash);
 
     fclose(fp);
 
