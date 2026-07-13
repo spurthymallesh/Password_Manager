@@ -2,5 +2,5 @@
 *.exe
 *.out
 build/
-users/*.vault
-users/*.master
+users/
+!users/.gitkeep
