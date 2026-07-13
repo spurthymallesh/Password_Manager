@@ -5,7 +5,8 @@ CFLAGS = -Wall -Wextra -Iinclude
 SRC = src/main.c \
       src/register.c \
       src/login.c \
-      src/file.c
+      src/file.c \
+      src/utils.c
 
 TARGET = password_manager
 
