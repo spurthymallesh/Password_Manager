@@ -8,8 +8,8 @@ int register_user(void)
 
     printf("\n========== USER REGISTRATION ==========\n");
 
-    printf("Enter Username : ");
-    scanf("%29s", username);
+    get_username(username, MAX_USERNAME);
+    //clear_input_buffer();
 
     if(user_exists(username))
     {
@@ -19,46 +19,39 @@ int register_user(void)
 
     int attempts = 3;
 
-while (attempts > 0)
+while (1)
 {
     printf("Enter Master Password : ");
-    scanf("%99s", password);
+    get_hidden_password(password, MAX_PASSWORD);
 
+    if (is_strong_password(password) == SUCCESS)
+        break;
+
+    printf("\nWeak Password!\n");
+    printf("Password must contain:\n");
+    printf("  - Minimum 8 characters\n");
+    printf("  - One uppercase letter\n");
+    printf("  - One lowercase letter\n");
+    printf("  - One digit\n");
+    printf("  - One special character\n\n");
+}
+
+attempts = 3;
+
+while (attempts > 0)
+{
     printf("Confirm Password : ");
-    scanf("%99s", confirm);
+    get_hidden_password(confirm, MAX_PASSWORD);
 
-    if (strcmp(password, confirm) != 0)
-    {
-        attempts--;
+    if(strcmp(password, confirm) == 0)
+        break;
 
-        printf("\nPasswords do not match!\n");
+    attempts--;
 
-        if (attempts > 0)
-            printf("You have %d attempt(s) remaining.\n\n", attempts);
+    printf("\nPasswords do not match!\n");
 
-        continue;
-    }
-
-    if (is_strong_password(password) == FAILURE)
-    {
-        attempts--;
-
-        printf("\nWeak Password!\n");
-        printf("Password must contain:\n");
-        printf("  - Minimum 8 characters\n");
-        printf("  - One uppercase letter\n");
-        printf("  - One lowercase letter\n");
-        printf("  - One digit\n");
-        printf("  - One special character\n");
-
-        if (attempts > 0)
-            printf("\nYou have %d attempt(s) remaining.\n\n", attempts);
-
-        continue;
-    }
-
-    /* Password is valid */
-    break;
+    if(attempts > 0)
+        printf("You have %d confirmation attempt(s) remaining.\n\n", attempts);
 }
 
 if (attempts == 0)

@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <termios.h>
+#include <unistd.h>
 
 /* Constants */
 #define MAX_USERNAME    30
@@ -44,6 +46,7 @@ int login_user(char *logged_user);
 /* Validation */
 int username_exists(const char *username);
 int is_strong_password(const char *password);
+void clear_input_buffer(void);
 
 /* File Operations */
 int user_exists(const char *username);
@@ -55,4 +58,39 @@ int read_master_file(const char *username, User *user);
 /* SHA-256 Wrapper */
 void sha256_string(const char *input, char output[HASH_SIZE]);
 void sha256_string(const char *input, char output[65]);
+
+/* Vault */
+int vault_menu(const char *username);
+
+int add_credential(const char *username);
+
+int view_credentials(const char *username);
+
+int search_credential(const char *username);
+
+int edit_credential(const char *username);
+
+int delete_credential(const char *username);
+
+/* Input Utilities */
+void clear_input_buffer(void);
+
+int get_menu_choice(void);
+
+void get_username(char *username, int size);
+
+void get_password(char *password, int size);
+
+void trim_newline(char *str);
+
+int is_valid_username(const char *username);
+
+void get_hidden_password(char *password, int size);
+
+/* Encryption */
+void encrypt_password(const char *plain, char *encrypted);
+void decrypt_password(const char *encrypted, char *plain);
+
+int add_credential(const char *username);
+
 #endif

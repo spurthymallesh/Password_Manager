@@ -14,14 +14,9 @@ int main(void)
         printf("2. Login\n");
         printf("3. Exit\n");
 
-        printf("\nEnter your choice: ");
+        //printf("\nEnter your choice: ");
 
-        if (scanf("%d", &choice) != 1)
-        {
-            while (getchar() != '\n');
-            printf("\nInvalid input!\n");
-            continue;
-        }
+        choice = get_menu_choice();
 
         switch (choice)
         {
@@ -32,9 +27,7 @@ int main(void)
             case 2:
                 if (login_user(logged_user) == SUCCESS)
                 {
-                    printf("\nWelcome %s!\n", logged_user);
-
-                    /* Vault menu will be added later */
+                    vault_menu(logged_user);
                 }
                 break;
 

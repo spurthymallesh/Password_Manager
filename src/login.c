@@ -9,8 +9,8 @@ int login_user(char *logged_user)
 
     printf("\n========== LOGIN ==========\n");
 
-    printf("Enter Username : ");
-    scanf("%29s", username);
+    get_username(username, MAX_USERNAME);
+    //clear_input_buffer();
 
     if (!user_exists(username))
     {
@@ -31,7 +31,8 @@ int login_user(char *logged_user)
 while (attempts > 0)
 {
     printf("Enter Master Password : ");
-    scanf("%99s", password);
+get_hidden_password(password, MAX_PASSWORD);
+    //clear_input_buffer();
 
     sha256_string(password, entered_hash);
 
