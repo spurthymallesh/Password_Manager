@@ -93,4 +93,7 @@ void decrypt_password(const char *encrypted, char *plain);
 
 int add_credential(const char *username);
 
+int save_credential(const char *logged_user, Credential *cred);
+int load_credentials(const char *logged_user);
+
 #endif

@@ -21,6 +21,7 @@ int vault_menu(const char *username)
 
         printf("\nEnter Choice : ");
         scanf("%d", &choice);
+        clear_input_buffer(); 
 
         switch(choice)
         {
@@ -29,7 +30,7 @@ int vault_menu(const char *username)
                 break;
 
             case 2:
-                printf("\nView Credential Module\n");
+                view_credentials(username);
                 break;
 
             case 3:
@@ -71,7 +72,60 @@ int add_credential(const char *username)
     printf("Password : ");
     get_hidden_password(cred.password, MAX_PASSWORD);
 
-    printf("\nCredential Captured Successfully!\n");
+   if (save_credential(username, &cred) == SUCCESS)
+{
+    printf("\nCredential Saved Successfully!\n");
+}
+else
+{
+    printf("\nFailed to Save Credential!\n");
+}
+
+return SUCCESS;
+}
+
+int view_credentials(const char *username)
+{
+    char path[200];
+    FILE *fp;
+    Credential cred;
+    char password[MAX_PASSWORD];
+
+    sprintf(path, "users/%s/vault.dat", username);
+
+    fp = fopen(path, "r");
+
+    if (fp == NULL)
+    {
+        printf("\nNo credentials found.\n");
+        return FAILURE;
+    }
+
+    printf("\n========== SAVED CREDENTIALS ==========\n\n");
+
+    int found = 0;
+
+    while (fscanf(fp,
+                  "%99[^|]|%99[^|]|%99[^\n]\n",
+                  cred.website,
+                  cred.username,
+                  password) == 3)
+    {
+        found = 1;
+
+        printf("Website : %s\n", cred.website);
+        printf("Username : %s\n", cred.username);
+        printf("Password : %s\n", password);
+
+        printf("----------------------------------------\n");
+    }
+
+    if (!found)
+    {
+        printf("No credentials found.\n");
+    }
+
+    fclose(fp);
 
     return SUCCESS;
 }

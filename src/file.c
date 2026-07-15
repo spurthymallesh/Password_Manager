@@ -76,3 +76,31 @@ int read_master_file(const char *username, User *user)
 
     return SUCCESS;
 }
+
+#include "../include/password_manager.h"
+
+int save_credential(const char *logged_user, Credential *cred)
+{
+    char path[200];
+    FILE *fp;
+
+    sprintf(path, "users/%s/vault.dat", logged_user);
+
+    fp = fopen(path, "a");
+
+    if(fp == NULL)
+    {
+        printf("Unable to open vault file.\n");
+        return FAILURE;
+    }
+
+    fprintf(fp,
+            "%s|%s|%s\n",
+            cred->website,
+            cred->username,
+            cred->password);
+
+    fclose(fp);
+
+    return SUCCESS;
+}
