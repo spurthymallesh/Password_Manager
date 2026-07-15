@@ -34,7 +34,7 @@ int vault_menu(const char *username)
                 break;
 
             case 3:
-                printf("\nSearch Credential Module\n");
+                search_credential(username);
                 break;
 
             case 4:
@@ -123,6 +123,61 @@ int view_credentials(const char *username)
     if (!found)
     {
         printf("No credentials found.\n");
+    }
+
+    fclose(fp);
+
+    return SUCCESS;
+}
+
+int search_credential(const char *username)
+{
+    char path[200];
+    FILE *fp;
+
+    Credential cred;
+    char password[MAX_PASSWORD];
+    char website[MAX_WEBSITE];
+
+    sprintf(path, "users/%s/vault.dat", username);
+
+    fp = fopen(path, "r");
+
+    if(fp == NULL)
+    {
+        printf("\nUnable to open vault.\n");
+        return FAILURE;
+    }
+
+    printf("\nSearch Website : ");
+    fgets(website, MAX_WEBSITE, stdin);
+    trim_newline(website);
+
+    int found = 0;
+
+    while(fscanf(fp,
+                 "%99[^|]|%99[^|]|%99[^\n]\n",
+                 cred.website,
+                 cred.username,
+                 password) == 3)
+    {
+        if(strcmp(cred.website, website) == 0)
+        {
+            found = 1;
+
+            printf("\n========== MATCH FOUND ==========\n");
+
+            printf("Website : %s\n", cred.website);
+            printf("Username : %s\n", cred.username);
+            printf("Password : %s\n", password);
+
+            printf("---------------------------------\n");
+        }
+    }
+
+    if(!found)
+    {
+        printf("\nCredential not found.\n");
     }
 
     fclose(fp);
