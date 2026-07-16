@@ -42,7 +42,7 @@ int vault_menu(const char *username)
                 break;
 
             case 5:
-                printf("\nDelete Credential Module\n");
+                delete_credential(username);
                 break;
 
             case 6:
@@ -378,6 +378,129 @@ int edit_credential(const char *username)
 
         printf("\nCredential Updated Successfully.\n");
     }
+
+    return SUCCESS;
+}
+int delete_credential(const char *username)
+{
+    char path[200];
+    char temp_path[200];
+
+    FILE *fp;
+    FILE *temp;
+
+    Credential cred;
+    char password[MAX_PASSWORD];
+    char website[MAX_WEBSITE];
+
+    sprintf(path, "users/%s/vault.dat", username);
+    sprintf(temp_path, "users/%s/temp.dat", username);
+
+    printf("\nEnter Website to Delete : ");
+    fgets(website, MAX_WEBSITE, stdin);
+    trim_newline(website);
+
+    fp = fopen(path, "r");
+
+    if(fp == NULL)
+    {
+        printf("\nUnable to open vault.\n");
+        return FAILURE;
+    }
+
+    int count = 0;
+
+    printf("\n========== MATCHING CREDENTIALS ==========\n");
+
+    while(fscanf(fp,
+                 "%99[^|]|%99[^|]|%99[^\n]\n",
+                 cred.website,
+                 cred.username,
+                 password) == 3)
+    {
+        if(strcmp(cred.website, website) == 0)
+        {
+            count++;
+
+            printf("\n%d.\n", count);
+            printf("Website : %s\n", cred.website);
+            printf("Username : %s\n", cred.username);
+        }
+    }
+
+    fclose(fp);
+
+    if(count == 0)
+    {
+        printf("\nCredential Not Found.\n");
+        return FAILURE;
+    }
+
+    printf("\nSelect Credential Number : ");
+    int selected = get_menu_choice();
+
+    if(selected < 1 || selected > count)
+    {
+        printf("\nInvalid Selection.\n");
+        return FAILURE;
+    }
+
+    fp = fopen(path, "r");
+    temp = fopen(temp_path, "w");
+
+    int current = 0;
+    int deleted = 0;
+
+    while(fscanf(fp,
+                 "%99[^|]|%99[^|]|%99[^\n]\n",
+                 cred.website,
+                 cred.username,
+                 password) == 3)
+    {
+        if(strcmp(cred.website, website) == 0)
+        {
+            current++;
+
+            if(current == selected)
+            {
+                printf("\n========== DELETE CREDENTIAL ==========\n\n");
+
+                printf("Website : %s\n", cred.website);
+                printf("Username : %s\n", cred.username);
+
+                printf("\nAre you sure?\n");
+                printf("1. Yes\n");
+                printf("2. No\n");
+
+                printf("\nChoice : ");
+
+                int confirm = get_menu_choice();
+
+                if(confirm == 1)
+                {
+                    deleted = 1;
+                    continue;
+                }
+            }
+        }
+
+        fprintf(temp,
+                "%s|%s|%s\n",
+                cred.website,
+                cred.username,
+                password);
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove(path);
+    rename(temp_path, path);
+
+    if(deleted)
+        printf("\nCredential Deleted Successfully.\n");
+    else
+        printf("\nDeletion Cancelled.\n");
 
     return SUCCESS;
 }
