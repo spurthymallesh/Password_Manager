@@ -38,7 +38,7 @@ int vault_menu(const char *username)
                 break;
 
             case 4:
-                printf("\nEdit Credential Module\n");
+                edit_credential(username);
                 break;
 
             case 5:
@@ -181,6 +181,203 @@ int search_credential(const char *username)
     }
 
     fclose(fp);
+
+    return SUCCESS;
+}
+
+int edit_credential(const char *username)
+{
+    char path[200];
+    char temp_path[200];
+
+    FILE *fp;
+    FILE *temp;
+
+    Credential cred;
+    char password[MAX_PASSWORD];
+    char website[MAX_WEBSITE];
+
+    sprintf(path, "users/%s/vault.dat", username);
+    sprintf(temp_path, "users/%s/temp.dat", username);
+
+    printf("\nEnter Website to Edit : ");
+    fgets(website, MAX_WEBSITE, stdin);
+    trim_newline(website);
+
+    /* ---------- PASS 1 : Display Matching Credentials ---------- */
+
+    fp = fopen(path, "r");
+
+    if(fp == NULL)
+    {
+        printf("\nUnable to open vault.\n");
+        return FAILURE;
+    }
+
+    int count = 0;
+
+    printf("\n========== MATCHING CREDENTIALS ==========\n");
+
+    while(fscanf(fp,
+                 "%99[^|]|%99[^|]|%99[^\n]\n",
+                 cred.website,
+                 cred.username,
+                 password) == 3)
+    {
+        if(strcmp(cred.website, website) == 0)
+        {
+            count++;
+
+            printf("\n%d.\n", count);
+            printf("Website : %s\n", cred.website);
+            printf("Username : %s\n", cred.username);
+        }
+    }
+
+    fclose(fp);
+
+    if(count == 0)
+    {
+        printf("\nCredential Not Found.\n");
+        return FAILURE;
+    }
+
+    int selected;
+
+    printf("\nSelect Credential Number : ");
+    selected = get_menu_choice();
+
+    if(selected < 1 || selected > count)
+    {
+        printf("\nInvalid Selection.\n");
+        return FAILURE;
+    }
+
+    /* ---------- PASS 2 : Edit Selected Credential ---------- */
+
+    fp = fopen(path, "r");
+    temp = fopen(temp_path, "w");
+
+    if(fp == NULL || temp == NULL)
+    {
+        if(fp) fclose(fp);
+        if(temp) fclose(temp);
+
+        printf("\nUnable to open files.\n");
+        return FAILURE;
+    }
+
+    int current = 0;
+    int updated = 0;
+
+    while(fscanf(fp,
+                 "%99[^|]|%99[^|]|%99[^\n]\n",
+                 cred.website,
+                 cred.username,
+                 password) == 3)
+    {
+        if(strcmp(cred.website, website) == 0)
+        {
+            current++;
+
+            if(current == selected)
+            {
+                printf("\n========== CURRENT CREDENTIAL ==========\n\n");
+
+                printf("Website : %s\n", cred.website);
+                printf("Username : %s\n", cred.username);
+
+                printf("Password : ");
+                for(int i = 0; password[i] != '\0'; i++)
+                    printf("*");
+
+                printf("\n");
+
+                printf("----------------------------------------\n");
+
+                printf("\nWhat do you want to edit?\n");
+                printf("1. Username\n");
+                printf("2. Password\n");
+                printf("3. Both Username & Password\n");
+                printf("4. Cancel\n");
+
+                printf("\nEnter Choice : ");
+
+                int choice = get_menu_choice();
+
+                switch(choice)
+                {
+                    case 1:
+
+                        printf("\nEnter New Username : ");
+                        fgets(cred.username, MAX_USERNAME, stdin);
+                        trim_newline(cred.username);
+
+                        updated = 1;
+                        break;
+
+                    case 2:
+
+                        printf("\nEnter New Password : ");
+                        get_hidden_password(password, MAX_PASSWORD);
+
+                        updated = 1;
+                        break;
+
+                    case 3:
+
+                        printf("\nEnter New Username : ");
+                        fgets(cred.username, MAX_USERNAME, stdin);
+                        trim_newline(cred.username);
+
+                        printf("Enter New Password : ");
+                        get_hidden_password(password, MAX_PASSWORD);
+
+                        updated = 1;
+                        break;
+
+                    case 4:
+
+                        printf("\nEdit Cancelled.\n");
+                        break;
+
+                    default:
+
+                        printf("\nInvalid Choice.\n");
+                }
+            }
+        }
+
+        fprintf(temp,
+                "%s|%s|%s\n",
+                cred.website,
+                cred.username,
+                password);
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove(path);
+    rename(temp_path, path);
+
+    if(updated)
+    {
+        printf("\n========== UPDATED CREDENTIAL ==========\n\n");
+
+        printf("Website : %s\n", cred.website);
+        printf("Username : %s\n", cred.username);
+
+        printf("Password : ");
+        for(int i = 0; password[i] != '\0'; i++)
+            printf("*");
+
+        printf("\n");
+
+        printf("----------------------------------------\n");
+
+        printf("\nCredential Updated Successfully.\n");
+    }
 
     return SUCCESS;
 }
