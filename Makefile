@@ -13,8 +13,10 @@ SRC = src/main.c \
 
 TARGET = password_manager
 
+LDFLAGS = -lcrypto
+
 all:
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)

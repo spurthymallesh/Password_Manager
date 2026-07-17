@@ -22,6 +22,9 @@
 #define SUCCESS         1
 #define FAILURE         0
 
+#define AES_KEY_SIZE 32
+#define AES_IV_SIZE 16
+
 /* Credential Structure */
 typedef struct
 {
@@ -37,6 +40,16 @@ typedef struct
     char password_hash[HASH_SIZE];
 } User;
 
+
+int encrypt_password(const char *plaintext,
+                     const unsigned char *key,
+                     char *cipher_hex);
+
+int decrypt_password(const char *cipher_hex,
+                     const unsigned char *key,
+                     char *plaintext);
+
+                     
 /* Registration */
 int register_user(void);
 
@@ -88,8 +101,8 @@ int is_valid_username(const char *username);
 void get_hidden_password(char *password, int size);
 
 /* Encryption */
-void encrypt_password(const char *plain, char *encrypted);
-void decrypt_password(const char *encrypted, char *plain);
+//void encrypt_password(const char *plain, char *encrypted);
+//void decrypt_password(const char *encrypted, char *plain);
 
 int add_credential(const char *username);
 
