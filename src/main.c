@@ -5,6 +5,9 @@ int main(void)
     int choice;
     char logged_user[MAX_USERNAME];
 
+
+    // test_aes();
+    
     while (1)
     {
         printf("\n=====================================\n");

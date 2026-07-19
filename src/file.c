@@ -94,11 +94,30 @@ int save_credential(const char *logged_user, Credential *cred)
         return FAILURE;
     }
 
-    fprintf(fp,
-            "%s|%s|%s\n",
-            cred->website,
-            cred->username,
-            cred->password);
+    unsigned char cipher[MAX_CIPHER_LEN];
+
+char hex[MAX_CIPHER_LEN * 2 + 1];
+
+int cipher_len;
+
+if(aes_encrypt(cred->password,
+               session_key,
+               cipher,
+               &cipher_len) == FAILURE)
+{
+    fclose(fp);
+    return FAILURE;
+}
+
+bytes_to_hex(cipher,
+             cipher_len,
+             hex);
+
+fprintf(fp,
+        "%s|%s|%s\n",
+        cred->website,
+        cred->username,
+        hex);
 
     fclose(fp);
 

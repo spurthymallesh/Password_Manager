@@ -1,5 +1,7 @@
 #include "../include/password_manager.h"
 
+unsigned char session_key[AES_KEY_SIZE];
+
 int login_user(char *logged_user)
 {
     char username[MAX_USERNAME];
@@ -57,10 +59,13 @@ if (attempts == 0)
     return FAILURE;
 }
 
+    hex_to_bytes(entered_hash, session_key);
+
     strcpy(logged_user, user.username);
 
     printf("\nLogin Successful.\n");
     printf("Welcome %s!\n", logged_user);
+
 
     return SUCCESS;
 }

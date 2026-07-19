@@ -46,6 +46,7 @@ int vault_menu(const char *username)
                 break;
 
             case 6:
+                memset(session_key, 0, AES_KEY_SIZE);
                 printf("\nLogged Out Successfully.\n");
                 return SUCCESS;
 
@@ -89,7 +90,11 @@ int view_credentials(const char *username)
     char path[200];
     FILE *fp;
     Credential cred;
-    char password[MAX_PASSWORD];
+char password[MAX_CIPHER_LEN * 2 + 1];
+
+unsigned char cipher[MAX_CIPHER_LEN];
+char decrypted_password[MAX_PASSWORD];
+int cipher_len;
 
     sprintf(path, "users/%s/vault.dat", username);
 
@@ -115,7 +120,21 @@ int view_credentials(const char *username)
 
         printf("Website : %s\n", cred.website);
         printf("Username : %s\n", cred.username);
-        printf("Password : %s\n", password);
+        cipher_len = hex_to_bytes(password, cipher);
+
+if (cipher_len == FAILURE)
+{
+    strcpy(decrypted_password, "DECRYPTION ERROR");
+}
+else if (aes_decrypt(cipher,
+                     cipher_len,
+                     session_key,
+                     decrypted_password) == FAILURE)
+{
+    strcpy(decrypted_password, "DECRYPTION ERROR");
+}
+
+printf("Password : %s\n", decrypted_password);
 
         printf("----------------------------------------\n");
     }
@@ -136,7 +155,11 @@ int search_credential(const char *username)
     FILE *fp;
 
     Credential cred;
-    char password[MAX_PASSWORD];
+    char password[MAX_CIPHER_LEN * 2 + 1];
+
+unsigned char cipher[MAX_CIPHER_LEN];
+char decrypted_password[MAX_PASSWORD];
+int cipher_len;
     char website[MAX_WEBSITE];
 
     sprintf(path, "users/%s/vault.dat", username);
@@ -169,7 +192,21 @@ int search_credential(const char *username)
 
             printf("Website : %s\n", cred.website);
             printf("Username : %s\n", cred.username);
-            printf("Password : %s\n", password);
+            cipher_len = hex_to_bytes(password, cipher);
+
+if (cipher_len == FAILURE)
+{
+    strcpy(decrypted_password, "DECRYPTION ERROR");
+}
+else if (aes_decrypt(cipher,
+                     cipher_len,
+                     session_key,
+                     decrypted_password) == FAILURE)
+{
+    strcpy(decrypted_password, "DECRYPTION ERROR");
+}
+
+printf("Password : %s\n", decrypted_password);
 
             printf("---------------------------------\n");
         }
@@ -194,8 +231,25 @@ int edit_credential(const char *username)
     FILE *temp;
 
     Credential cred;
-    char password[MAX_PASSWORD];
-    char website[MAX_WEBSITE];
+
+/* Buffers */
+char password[MAX_CIPHER_LEN * 2 + 1];      // encrypted hex string
+char decrypted_password[MAX_PASSWORD];      // decrypted password
+char website[MAX_WEBSITE];
+
+/* AES */
+unsigned char cipher[MAX_CIPHER_LEN];
+unsigned char new_cipher[MAX_CIPHER_LEN];
+
+
+Credential updated_cred;
+char updated_password[MAX_PASSWORD];
+
+char hex[MAX_CIPHER_LEN * 2 + 1];
+
+int cipher_len;
+int new_len;
+int password_changed = 0;
 
     sprintf(path, "users/%s/vault.dat", username);
     sprintf(temp_path, "users/%s/temp.dat", username);
@@ -287,11 +341,25 @@ int edit_credential(const char *username)
                 printf("Website : %s\n", cred.website);
                 printf("Username : %s\n", cred.username);
 
-                printf("Password : ");
-                for(int i = 0; password[i] != '\0'; i++)
-                    printf("*");
+                cipher_len = hex_to_bytes(password, cipher);
 
-                printf("\n");
+if (cipher_len == FAILURE ||
+    aes_decrypt(cipher,
+                cipher_len,
+                session_key,
+                decrypted_password) == FAILURE)
+{
+    strcpy(decrypted_password, "");
+}
+
+                printf("Password : ");
+
+for(int i = 0; decrypted_password[i] != '\0'; i++)
+{
+    printf("*");
+}
+
+printf("\n");
 
                 printf("----------------------------------------\n");
 
@@ -318,23 +386,25 @@ int edit_credential(const char *username)
 
                     case 2:
 
-                        printf("\nEnter New Password : ");
-                        get_hidden_password(password, MAX_PASSWORD);
+    printf("\nEnter New Password : ");
+    get_hidden_password(decrypted_password, MAX_PASSWORD);
 
-                        updated = 1;
-                        break;
+    password_changed = 1;
+    updated = 1;
+    break;
 
                     case 3:
 
-                        printf("\nEnter New Username : ");
-                        fgets(cred.username, MAX_USERNAME, stdin);
-                        trim_newline(cred.username);
+    printf("\nEnter New Username : ");
+    fgets(cred.username, MAX_USERNAME, stdin);
+    trim_newline(cred.username);
 
-                        printf("Enter New Password : ");
-                        get_hidden_password(password, MAX_PASSWORD);
+    printf("Enter New Password : ");
+    get_hidden_password(decrypted_password, MAX_PASSWORD);
 
-                        updated = 1;
-                        break;
+    password_changed = 1;
+    updated = 1;
+    break;
 
                     case 4:
 
@@ -345,8 +415,27 @@ int edit_credential(const char *username)
 
                         printf("\nInvalid Choice.\n");
                 }
+
+                updated_cred = cred;
+strcpy(updated_password, decrypted_password);
             }
         }
+
+        if(password_changed)
+{
+    aes_encrypt(decrypted_password,
+            session_key,
+            new_cipher,
+            &new_len);
+
+    bytes_to_hex(new_cipher,
+                 new_len,
+                 hex);
+
+    strcpy(password, hex);
+
+    password_changed = 0;
+}
 
         fprintf(temp,
                 "%s|%s|%s\n",
@@ -365,12 +454,15 @@ int edit_credential(const char *username)
     {
         printf("\n========== UPDATED CREDENTIAL ==========\n\n");
 
-        printf("Website : %s\n", cred.website);
-        printf("Username : %s\n", cred.username);
+        printf("Website : %s\n", updated_cred.website);
+        printf("Username : %s\n", updated_cred.username);
 
         printf("Password : ");
-        for(int i = 0; password[i] != '\0'; i++)
-            printf("*");
+
+for(int i = 0; updated_password[i] != '\0'; i++)
+    printf("*");
+
+printf("\n");
 
         printf("\n");
 

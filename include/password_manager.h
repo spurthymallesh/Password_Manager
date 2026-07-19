@@ -24,6 +24,9 @@
 
 #define AES_KEY_SIZE 32
 #define AES_IV_SIZE 16
+#define MAX_CIPHER_LEN 512
+
+extern unsigned char session_key[AES_KEY_SIZE];
 
 /* Credential Structure */
 typedef struct
@@ -85,6 +88,8 @@ int edit_credential(const char *username);
 
 int delete_credential(const char *username);
 
+void test_aes(void);
+
 /* Input Utilities */
 void clear_input_buffer(void);
 
@@ -108,5 +113,22 @@ int add_credential(const char *username);
 
 int save_credential(const char *logged_user, Credential *cred);
 int load_credentials(const char *logged_user);
+
+int aes_encrypt(const char *plaintext,
+                const unsigned char *key,
+                unsigned char *ciphertext,
+                int *cipher_len);
+
+int aes_decrypt(const unsigned char *ciphertext,
+                int cipher_len,
+                const unsigned char *key,
+                char *plaintext);
+
+void bytes_to_hex(const unsigned char *bytes,
+                  int len,
+                  char *hex);
+
+int hex_to_bytes(const char *hex,
+                 unsigned char *bytes);
 
 #endif
